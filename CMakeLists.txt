@@ -33,11 +33,14 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(publisher src/pub.cpp)
 add_executable(listener src/Movements.cpp)
+add_executable(GT src/ground_truth.cpp)
 
 target_link_libraries(publisher ${catkin_LIBRARIES})
 target_link_libraries(listener ${catkin_LIBRARIES})
+target_link_libraries(GT ${catkin_LIBRARIES})
 
 add_dependencies(publisher ${catkin_EXPORTED_TARGETS})
 add_dependencies(listener ${catkin_EXPORTED_TARGETS})
+add_dependencies(GT ${catkin_EXPORTED_TARGETS})
 add_dependencies(publisher ${main_node}_gencfg)
 
