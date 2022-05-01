@@ -38,7 +38,6 @@ int main(int argc, char **argv) {
     wheel_vel = n.advertise<main_node::wheels>("wheels_rpm", 1000);
     ros::Subscriber sub = n.subscribe("cmd_vel", 1000, printVelocities);
 
-
     ros::spin();
 
     return 0;

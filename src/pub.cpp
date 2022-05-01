@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     double Zk = 0;
     double Xk = 0;
     double Yk = 0;
-    int fmt = 1;
+    int fmt = 0;
 
     dynamic_reconfigure::Server<main_node::parametersConfig> dynServer;
     dynamic_reconfigure::Server<main_node::parametersConfig>::CallbackType f;
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     ros::Publisher positions = n.advertise<nav_msgs::Odometry>("odom", 1000);
 
     rosbag::Bag bag1;
-    bag1.open("/home/scara/robotics/src/main_node/bags/bag1.bag", rosbag::bagmode::Read);
+    bag1.open("/home/scara/robotics/src/main_node/bags/bag3.bag", rosbag::bagmode::Read);
 
     std::vector <std::string> topics1;
     topics1.push_back(std::string("/wheel_states"));
@@ -136,27 +136,10 @@ int main(int argc, char **argv) {
         double Wfr = (dticksfr / dtime) * (1 / N) * (1 / T) * 2 * 3.14;
         double Wrl = (dticksrl / dtime) * (1 / N) * (1 / T) * 2 * 3.14;
         double Wrr = (dticksrr / dtime) * (1 / N) * (1 / T) * 2 * 3.14;
-        //if(Wfl != 0)
-        //{
-            /*std::cout << "Wfl: " << Wfl << ",";
-            std::cout << "Wfr: " << Wfr << ",";
-            std::cout << "Wrl: " << Wrl << ",";
-            std::cout << "Wrr: " << Wrr << std::endl;
-            std::cout << "---------------------- "<< std::endl;*/
-        //}
-
 
         Vx = (radius / 4) * (Wfl + Wfr + Wrl + Wrr);
         Vy = (radius / 4) * (-Wfl + Wfr + Wrl - Wrr);
         Wz = (radius / ((l + w) * 4)) * (-Wfl + Wfr - Wrl + Wrr);
-
-        /*if(Vx != 0)
-        {
-            std::cout << "velocità x: " << Vx << std::endl;
-            std::cout << "velocità y: " << Vy << std::endl;
-            std::cout << "velocità angolare: " << Wz << std::endl;
-            std::cout << "-------------" << std::endl;
-        }*/
 
         tick0fr = tick1fr;
         tick0fl = tick1fl;
@@ -175,30 +158,24 @@ int main(int argc, char **argv) {
         if(fmt == 0)
         {
             ROS_INFO("EULERO");
+
             //euler approximation
-
             Zk = Zk + Wz * abs(Timek1 - Timek);
-            Xk1 = Xk + Vx * abs(Timek1 - Timek);
-            Yk1 = Yk + Vy * abs(Timek1 - Timek);
+            Xk1 = Xk + (Vx* cos(Zk) - Vy*sin(Zk))* abs(Timek1 - Timek);
+            Yk1 = Yk + (Vx* sin(Zk) + Vy*cos(Zk))* abs(Timek1 - Timek);
 
-
-            //ROS_INFO("Xk1: %f, Yk1: %f, Zk: %f", Xk1, Yk1, Zk);
+            ROS_INFO("Xk1: %f, Yk1: %f, Zk: %f", Xk1, Yk1, Zk);
         }
         else
         {
             ROS_INFO("RUNGE-KUTTA");
+
             //runge_kutta
-            /*if(Vx < 0 && Vy < 0)
-                Vk = -Vk;
-            else if(Vx < 0 && Vy > 0)
-                Vk = -Vk* cos(3.14);
-            else if(Vx > 0 && Vy < 0)
-                Vk = Vk* cos(3.14);*/
-            Xk1 = Xk + Vk * abs(Timek1 - Timek) * cos(Zk + ((Wz*abs(Timek1 - Timek))/2));
-            Yk1 = Yk + Vk * abs(Timek1 - Timek) * sin(Zk + ((Wz*abs(Timek1 - Timek))/2));
+            Xk1 = Xk + (Vx* cos(Zk + ((Wz*abs(Timek1 - Timek))/2)) - Vy*sin(Zk + ((Wz*abs(Timek1 - Timek))/2)))* abs(Timek1 - Timek);
+            Yk1 = Yk + (Vx* sin(Zk + ((Wz*abs(Timek1 - Timek))/2)) + Vy*cos(Zk + ((Wz*abs(Timek1 - Timek))/2)))* abs(Timek1 - Timek);
             Zk = Zk + Wz * abs(Timek1 - Timek);
 
-            //ROS_INFO("Xk1: %f, Yk1: %f, Zk: %f", Xk1, Yk1, Zk);
+            ROS_INFO("Xk1: %f, Yk1: %f, Zk: %f", Xk1, Yk1, Zk);
         }
 
         Xk = Xk1;

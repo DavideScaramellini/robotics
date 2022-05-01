@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     ros::NodeHandle n;
 
     rosbag::Bag bag;
-    bag.open("/home/scara/robotics/src/main_node/bags/bag3.bag", rosbag::bagmode::Read);
+    bag.open("/home/scara/robotics/src/main_node/bags/bag2.bag", rosbag::bagmode::Read);
 
     std::vector <std::string> topics;
     topics.push_back(std::string("/robot/pose"));
